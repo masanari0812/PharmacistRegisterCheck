@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { addUser, sendMessage, runScheduler } from "./scheduler.js";
+import { addUser, sendMessage, runScheduler } from "./common.js";
 
 dotenv.config();
 const app = express();
