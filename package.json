@@ -1,7 +1,11 @@
 {
-  "dependencies": {
-    "encoding-japanese": "^2.2.0",
-    "iconv-lite": "^0.6.3",
-    "node-fetch": "^3.3.2"
-  }
+    "type": "module",
+    "dependencies": {
+        "@line/bot-sdk": "^9.9.0",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "iconv-lite": "^0.6.3",
+        "lowdb": "^3.0.0",
+        "node-fetch": "^3.3.2"
+    }
 }
