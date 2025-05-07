@@ -36,7 +36,7 @@ export async function getExpireKey() {
  * @param {string} name
  * @returns {Promise<boolean>}
  */
-export async function CheckRegister(name) {
+export async function RegisterCheck(name) {
     try {
         // 現在の和暦年を「令和○年」の形式で取得
         const parts = new Intl.DateTimeFormat("ja-JP-u-ca-japanese", {
