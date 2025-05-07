@@ -4,7 +4,7 @@ import { Low, JSONFile } from "lowdb";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { messagingApi, middleware } from "@line/bot-sdk";
-import { RegisterCheck } from "./common.js";
+import { RegisterCheck, hasSpaceBetweenNames } from "./common.js";
 
 const { MessagingApiClient } = messagingApi;
 
@@ -52,8 +52,51 @@ async function initDB() {
     await db.write();
 }
 
-// ユーザー登録（例:userIdをdb保存）
-export async function addUser(name, userId) {
+// メッセージ処理
+export async function parseMessage(userId, message) {
+    await initDB();
+    let user = db.data.users.find((u) => u.userId === userId);
+
+    let name = message; // ← const から let に変更
+    // 苗字と名前の間に空白が含まれているか
+    if (hasSpaceBetweenNames(message)) {
+        if (message.startsWith("+")) {
+            const name = message.substring(1);
+            addName(user.userId, name);
+        } else if (message.startsWith("-")) {
+            const name = message.substring(1);
+            removeName(user.userId, name);
+        } else {
+            if (message.includes(`/`)) {
+                const result = message.split("/");
+                sendRegisterStatusMessage(user.userId, result[0], result[1]);
+                console.log(`${result[0]}さん::${result[1]}`);
+            } else {
+                sendRegisterStatusMessage(user.userId, message);
+            }
+        }
+    } else {
+        sendMessage(userId, `苗字と名前の間にスペースがありません->${name}`);
+    }
+
+    await db.write();
+}
+
+// LINEメッセージ送信
+export async function sendMessage(userId, message) {
+    try {
+        await client.pushMessage({
+            to: userId,
+            messages: [{ type: "text", text: message }],
+        });
+        console.log(`sent->${userId}:${message}`);
+    } catch (err) {
+        console.error(`fail->${userId}:${message}`, err);
+    }
+}
+
+// db名前追加・ユーザー登録の共通関数
+export async function addName(userId, name) {
     await initDB();
     let user = db.data.users.find((u) => u.userId === userId);
     const now = new Date().toISOString();
@@ -71,94 +114,59 @@ export async function addUser(name, userId) {
         }
     }
     await db.write();
+    sendMessage(user.userId, `${name}を登録しました`);
 }
 
-// メッセージ処理
-export async function parseMessage(userId, message) {
-    await initDB();
+async function removeName(userId, name) {
     let user = db.data.users.find((u) => u.userId === userId);
+    if (!user) return; // ユーザーがいなければ何もしない
 
-    const name = message;
-    // 苗字と名前の間に空白が含まれているか
-    const regex = /(?<=\S)[\u0020\u3000]+(?=\S)/;
-    if (regex.test(name)) {
-        const now = new Date().toISOString();
-        if (!user) {
-            user = {
-                userId: userId,
-                names: [{ name, timeStamp: now }],
-            };
-            db.data.users.push(user);
-        } else {
-            if (!user.names) user.names = [];
-            if (!user.names.some((n) => n.name === name)) {
-                user.names.push({ name, timeStamp: now });
-            } else {
-                user.names = user.names.map((n) =>
-                    n.name === name ? { ...n, timeStamp: now } : n
-                );
-            }
-        }
-        sendMessage(user.userId, `${name}を登録しました`);
-    } else {
-        sendMessage(userId, `文字と文字の間にスペースがありません->${name}`);
-    }
+    user.names = user.names.filter((n) => n.name !== name);
+    await sendMessage(user.userId, `${name}を削除しました`);
 
     await db.write();
+    if (user.names.length === 0) {
+        db.data.users = db.data.users.filter((u) => u.userId !== user.userId);
+        await db.write();
+        await sendMessage(user.userId, `登録されている名前を全て削除しました`);
+    }
 }
 
-// ユーザー登録＋メッセージ保存をまとめた関数
-async function registerAndSaveMessage(userId, message) {
-    await parseMessage(userId, message);
-}
-
-// LINEメッセージ送信
-export async function sendMessage(userId, message) {
-    try {
-        await client.pushMessage({
-            to: userId,
-            messages: [{ type: "text", text: message }],
-        });
-        console.log(`sent->${userId}:${message}`);
-    } catch (err) {
-        console.error(`fail->${userId}:${message}`, err);
+// 登録状況メッセージ送信関数（ここで登録確認も削除も行う）
+async function sendRegisterStatusMessage(userId, name, checkYear = undefined) {
+    const isRegistered = await RegisterCheck(name, checkYear);
+    if (isRegistered) {
+        await sendMessage(
+            userId,
+            checkYear
+                ? `${checkYear}に${name}さんは登録されています。`
+                : `今年度、${name}さんは登録されています。`
+        );
+        if (!checkYear) {
+            await removeName(userId, name);
+        }
+    } else {
+        await sendMessage(
+            userId,
+            checkYear
+                ? `${checkYear}に${name}さんは登録されていません。`
+                : `今年度はまだ${name}さんは登録されていません。`
+        );
     }
 }
 
 // 定期チェック関数
 async function periodicRegisterCheck() {
+    console.log("定期的なチェック");
     await initDB();
     let users = db.data.users || [];
     for (const user of [...users]) {
         if (!user.names || user.names.length === 0) continue;
         for (const nameObj of [...user.names]) {
-            const isRegistered = await RegisterCheck(nameObj.name);
-            if (isRegistered) {
-                await sendMessage(
-                    user.userId,
-                    `${nameObj.name}さんは登録されています。データベースから削除します。`
-                );
-                // 名前だけ削除
-                user.names = user.names.filter((n) => n.name !== nameObj.name);
-                await db.write();
-            } else {
-                await sendMessage(
-                    user.userId,
-                    `${nameObj.name}さんは登録されていません`
-                );
-            }
-        }
-        // 名前リストが空になったらユーザー自体も削除
-        if (user.names.length === 0) {
-            db.data.users = db.data.users.filter(
-                (u) => u.userId !== user.userId
-            );
-            await db.write();
+            await sendRegisterStatusMessage(user.userId, nameObj.name);
         }
     }
 }
-
-// 10分ごとに実行（600000ミリ秒）
 
 // LINE Webhook エンドポイント
 app.post("/linebot", express.json(), async (req, res) => {

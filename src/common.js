@@ -32,24 +32,35 @@ export async function getExpireKey() {
 }
 
 /**
+ * 苗字と名前の間に空白が含まれているか判定する
+ * @param {string} name
+ * @returns {boolean}
+ */
+export function hasSpaceBetweenNames(name) {
+    // 半角スペースまたは全角スペースが1つ以上、かつ両端が文字
+    const regex = /(?<=\S)[\u0020\u3000]+(?=\S)/;
+    return regex.test(name);
+}
+
+/**
  * 指定した名前の登録有無をチェックして boolean を返す
  * @param {string} name
  * @returns {Promise<boolean>}
  */
-export async function RegisterCheck(name) {
+export async function RegisterCheck(name, checkYear = undefined) {
     try {
         // 現在の和暦年を「令和○年」の形式で取得
-        const parts = new Intl.DateTimeFormat("ja-JP-u-ca-japanese", {
-            era: "long",
-            year: "numeric",
-        }).formatToParts(new Date());
-        const era = parts.find((p) => p.type === "era")?.value ?? "";
-        const year = parts.find((p) => p.type === "year")?.value ?? "";
-        const checkYear = `${era}${year}年`;
-
-        const gender = "1";
+        if (!checkYear) {
+            const parts = new Intl.DateTimeFormat("ja-JP-u-ca-japanese", {
+                era: "long",
+                year: "numeric",
+            }).formatToParts(new Date());
+            const era = parts.find((p) => p.type === "era")?.value ?? "";
+            const year = parts.find((p) => p.type === "year")?.value ?? "";
+            checkYear = `${era}${year}年`;
+        }
         const expireKey = await getExpireKey();
-
+        const gender = "3";
         // 名前を Shift_JIS でエンコードして URL エンコード文字列に
         const nameBuf = iconv.encode(name, "shift_jis");
         const encodedName = Array.from(nameBuf)
@@ -115,4 +126,3 @@ export async function RegisterCheck(name) {
 //         process.exit(exists ? 0 : 1);
 //     })();
 // }
-
