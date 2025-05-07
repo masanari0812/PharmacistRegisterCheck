@@ -104,14 +104,15 @@ export async function CheckRegister(name) {
 }
 
 // common.js を単体実行したときのエントリポイント
-if (import.meta.url.endsWith("common.js")) {
-    const name = process.env.CHECK_NAME;
-    if (!name) {
-        console.error("ERROR: 環境変数 CHECK_NAME が設定されていません");
-        process.exit(1);
-    }
-    (async () => {
-        const exists = await CheckRegister(name);
-        process.exit(exists ? 0 : 1);
-    })();
-}
+// if (require.main === module) {
+//     const name = process.env.CHECK_NAME;
+//     if (!name) {
+//         console.error("ERROR: 環境変数 CHECK_NAME が設定されていません");
+//         process.exit(1);
+//     }
+//     (async () => {
+//         const exists = await CheckRegister(name);
+//         process.exit(exists ? 0 : 1);
+//     })();
+// }
+

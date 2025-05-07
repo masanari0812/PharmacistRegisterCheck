@@ -6,7 +6,8 @@ dotenv.config();
 
 const nameToCheck = process.env.CHECK_NAME;
 const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-const INTERVAL = parseInt(process.env.SLACK_INTERVAL_MS) || 60 * 60 * 1000;
+const INTERVAL =
+    parseInt(process.env.SLACK_INTERVAL_SEC) * 1000 || 60 * 60 * 1000;
 
 if (!nameToCheck) {
     console.error("ERROR: 環境変数 CHECK_NAME が設定されていません");
@@ -41,4 +42,5 @@ async function checkAndNotify() {
 }
 
 // 即時実行 & 定期実行
+checkAndNotify();
 setInterval(checkAndNotify, INTERVAL);
