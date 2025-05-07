@@ -9,7 +9,7 @@ import { existsSync } from "fs";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.LINE_PORT || 3000;
 
 // ESモジュールでの __dirname 相当
 const __filename = fileURLToPath(import.meta.url);
@@ -29,7 +29,7 @@ async function initDB() {
 // ユーザー登録（例: 名前とuserIdを保存）
 export async function addUser(name, userId) {
     await initDB();
-    let user = db.data.users.find(u => u.userId === userId);
+    let user = db.data.users.find((u) => u.userId === userId);
     if (!user) {
         user = { userId, name, messages: [] };
         db.data.users.push(user);
@@ -42,14 +42,14 @@ export async function addUser(name, userId) {
 // メッセージ保存
 export async function saveLineMessage(userId, message) {
     await initDB();
-    let user = db.data.users.find(u => u.userId === userId);
+    let user = db.data.users.find((u) => u.userId === userId);
     if (!user) {
         user = { userId, name: "", messages: [] };
         db.data.users.push(user);
     }
     user.messages.push({
         text: message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
     await db.write();
 }
@@ -65,7 +65,7 @@ export async function sendMessage(userId, message) {
     const url = "https://api.line.me/v2/bot/message/push";
     const headers = {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
     };
     const body = {
         to: userId,

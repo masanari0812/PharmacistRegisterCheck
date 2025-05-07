@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "src/linebot.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [{ "src": "/webhook", "dest": "src/linebot.js" }]
+}
