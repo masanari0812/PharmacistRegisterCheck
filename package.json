@@ -7,5 +7,9 @@
         "iconv-lite": "^0.6.3",
         "lowdb": "^3.0.0",
         "node-fetch": "^3.3.2"
+    },
+    "scripts": {
+        "linebot": "node src/linebot.js",
+        "slackbot": "node src/slackbot.js"
     }
 }
