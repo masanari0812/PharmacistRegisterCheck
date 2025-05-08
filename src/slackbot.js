@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import { CheckRegister } from "./common.js";
+import { RegisterCheck } from "./common.js";
 
 dotenv.config();
 
@@ -23,7 +23,7 @@ console.log(`=== SlackBot Scheduler Started for ${nameToCheck} ===`);
 async function checkAndNotify() {
     try {
         console.log(`--- ${nameToCheck} の登録チェック ---`);
-        const exists = await CheckRegister(nameToCheck);
+        const exists = await RegisterCheck(nameToCheck);
         const text = exists
             ? `${nameToCheck}さんは登録されています 🎉`
             : `${nameToCheck}さんは未登録です ⚠️`;

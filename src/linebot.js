@@ -14,6 +14,9 @@ const app = express();
 const PORT = process.env.LINE_PORT || 3000;
 const INTERVAL =
     parseInt(process.env.LINE_INTERVAL_SEC) * 1000 || 60 * 60 * 1000;
+// LINEのレスポンスをセーブモードにするか否か(デフォルトはtrue)
+const SAVE_RESPONSE =
+    process.env.LINE_SAVE_RESPONSE_MODE != undefined ? process.env.LINE : true;
 
 // ESモジュールでの __dirname 相当
 const __filename = fileURLToPath(import.meta.url);
@@ -146,12 +149,15 @@ async function sendRegisterStatusMessage(userId, name, checkYear = undefined) {
             await removeName(userId, name);
         }
     } else {
-        await sendMessage(
-            userId,
-            checkYear
-                ? `${checkYear}に${name}さんは登録されていません。`
-                : `今年度はまだ${name}さんは登録されていません。`
-        );
+        if(!SAVE_RESPONSE||checkYear)
+        {
+            await sendMessage(
+                userId,
+                checkYear
+                    ? `${checkYear}に${name}さんは登録されていません。`
+                    : `今年度はまだ${name}さんは登録されていません。`
+            );
+        }
     }
 }
 
