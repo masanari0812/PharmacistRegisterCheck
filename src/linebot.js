@@ -65,19 +65,19 @@ export async function parseMessage(userId, message) {
     if (hasSpaceBetweenNames(message)) {
         if (message.startsWith("+")) {
             const name = message.substring(1);
-            addName(user.userId, name);
+            addName(userId, name);
         } else if (message.startsWith("-")) {
             const name = message.substring(1);
-            removeName(user.userId, name);
+            removeName(userId, name);
         } else {
             if (message.includes(`/`)) {
                 const result = message.split("/");
-                sendRegisterStatusMessage(user.userId, result[0], result[1]);
+                sendRegisterStatusMessage(userId, result[0], result[1]);
                 console.log(`${result[0]}さん::${result[1]}`);
             }
-            // else {
-            //     sendRegisterStatusMessage(user.userId, message);
-            // }
+            else {
+                sendRegisterStatusMessage(userId, message);
+            }
         }
     } else {
         sendMessage(userId, `苗字と名前の間にスペースがありません->${name}`);
