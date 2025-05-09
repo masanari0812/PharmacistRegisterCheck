@@ -74,9 +74,10 @@ export async function parseMessage(userId, message) {
                 const result = message.split("/");
                 sendRegisterStatusMessage(user.userId, result[0], result[1]);
                 console.log(`${result[0]}さん::${result[1]}`);
-            } else {
-                sendRegisterStatusMessage(user.userId, message);
             }
+            // else {
+            //     sendRegisterStatusMessage(user.userId, message);
+            // }
         }
     } else {
         sendMessage(userId, `苗字と名前の間にスペースがありません->${name}`);
@@ -149,8 +150,7 @@ async function sendRegisterStatusMessage(userId, name, checkYear = undefined) {
             await removeName(userId, name);
         }
     } else {
-        if(!SAVE_RESPONSE||checkYear)
-        {
+        if (!SAVE_RESPONSE || checkYear) {
             await sendMessage(
                 userId,
                 checkYear
