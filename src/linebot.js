@@ -161,7 +161,7 @@ async function sendRegisterStatusMessage(userId, name, checkYear = undefined) {
     }
 }
 
-// 定期チェック関数
+// 登録者チェック関数
 async function periodicRegisterCheck() {
     console.log("定期的なチェック");
     await initDB();
@@ -192,7 +192,16 @@ app.post("/linebot", express.json(), async (req, res) => {
     res.sendStatus(200);
 });
 
-setInterval(periodicRegisterCheck, INTERVAL);
+// Cronエンドポイント
+app.get("/cron", async (req, res) => {
+    try {
+        await periodicRegisterCheck();
+        res.sendStatus(200);
+    } catch (err) {
+        console.error("Cron error:", err);
+        res.sendStatus(500);
+    }
+});
 
 // サーバ起動
 app.listen(PORT, () => {
