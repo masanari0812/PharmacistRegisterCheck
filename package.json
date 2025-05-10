@@ -2,14 +2,10 @@
     "type": "module",
     "dependencies": {
         "@line/bot-sdk": "^9.9.0",
+        "@supabase/supabase-js": "^2.49.4",
         "dotenv": "^16.5.0",
         "express": "^5.1.0",
         "iconv-lite": "^0.6.3",
-        "lowdb": "^3.0.0",
         "node-fetch": "^3.3.2"
-    },
-    "scripts": {
-        "linebot": "node src/linebot.js",
-        "slackbot": "node src/slackbot.js"
     }
 }

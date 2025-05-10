@@ -2,12 +2,30 @@
     "version": 2,
     "builds": [
         {
-            "src": "src/linebot.js",
-            "use": "@vercel/node"
+            "src": "api/linebot.js",
+            "use": "@vercel/node",
+            "config": {
+                "maxLambdaSize": "15mb",
+                "includeFiles": "src/**"
+            }
         }
     ],
     "routes": [
-        { "src": "/webhook", "dest": "src/linebot.js" },
-        { "src": "/cron", "dest": "src/linebot.js" }
+        {
+            "src": "/webhook",
+            "dest": "/api/linebot",
+            "methods": ["POST"]
+        },
+        {
+            "src": "/cron",
+            "dest": "/api/linebot",
+            "methods": ["GET"]
+        }
+    ],
+    "crons": [
+        {
+            "path": "/cron",
+            "schedule": "0 18 * * *"
+        }
     ]
 }
