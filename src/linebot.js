@@ -163,7 +163,7 @@ async function sendRegisterStatusMessage(userId, name, checkYear = undefined) {
 
 // 登録者チェック関数
 async function periodicRegisterCheck() {
-    console.log("定期的なチェック");
+    console.log("db内の名簿チェック");
     await initDB();
     let users = db.data.users || [];
     for (const user of [...users]) {
