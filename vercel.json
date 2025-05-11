@@ -6,14 +6,5 @@
             "use": "@vercel/node"
         }
     ],
-    "routes": [
-        { "src": "/webhook", "dest": "src/linebot.js" },
-        { "src": "/cron", "dest": "src/linebot.js" }
-    ],
-    "crons": [
-        {
-            "path": "/cron",
-            "schedule": "0 */3 * * *"
-        }
-    ]
+    "routes": [{ "src": "/webhook", "dest": "src/linebot.js" }]
 }
