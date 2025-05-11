@@ -232,6 +232,18 @@ export default async function handler(req, res) {
             </html>
         `);
     } else {
-        res.status(404).end();
+        res.status(404).send(`
+            <!DOCTYPE html>
+            <html lang="ja">
+            <head>
+                <meta charset="UTF-8">
+                <title>404 Not Found</title>
+            </head>
+            <body>
+                <h1>404 Not Found</h1>
+                <p>お探しのページは見つかりませんでした。</p>
+            </body>
+            </html>
+        `);
     }
 }

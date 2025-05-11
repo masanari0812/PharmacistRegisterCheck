@@ -25,6 +25,10 @@
             "src": "/test",
             "dest": "/api/linebot",
             "methods": ["GET"]
+        },
+        {
+            "src": "/.*",
+            "dest": "/api/linebot"
         }
     ],
     "crons": [
